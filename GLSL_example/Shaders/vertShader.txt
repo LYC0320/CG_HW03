@@ -1,0 +1,43 @@
+#version 400 core
+
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 texCoord;
+layout (location = 2) in vec3 normal;
+// bump map
+layout (location = 3) in vec3 tangent;
+layout (location = 4) in vec3 bitangent;
+
+out vec2 TexCoord;
+out vec3 lightPosF;
+out vec4 positionF;
+out vec4 normalF;
+
+// bump map
+out mat3 TBN;
+
+
+uniform mat4 MVP;
+uniform mat4 V;
+uniform mat4 P;
+uniform mat4 M;
+uniform vec3 lightPos;
+
+void main()
+{
+	// bump map
+	//TBN = mat3(tangent, bitangent, normal);
+
+	TBN = mat3(tangent, bitangent, normal);
+
+
+	TexCoord = texCoord;
+	lightPosF = vec3(V * vec4(lightPos, 1.0));
+	normalF = vec4(  normalize(  mat3(transpose(inverse(V * M) ) )  * normal ), 1.0 ) ; // object normal to world normal 
+
+	//normalF = vec4(  normalize(  mat3(V * M)    * normal ), 1.0 ) ;
+
+	positionF = V * M * vec4(position, 1.0);
+
+	gl_Position = P * V * M * vec4(position, 1.0);
+
+}

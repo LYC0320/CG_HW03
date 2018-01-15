@@ -1,0 +1,74 @@
+#version 400 core
+
+uniform sampler2D MyTexture_1;
+uniform sampler2D MyTexture_2;
+
+// bump map
+//uniform sampler2D MyTexture_2;
+
+in vec2 TexCoord;
+in vec3 lightPosF;
+in vec4 positionF;
+in vec4 normalF;
+
+// bump map
+in mat3 TBN;
+
+vec4 i;
+vec4 lightColor = vec4(1.0,1.0,1.0,1.0);
+vec4 lightVec;
+
+
+
+
+uniform vec3 ka;
+uniform vec3 kd;
+uniform vec3 ks;
+uniform mat4 V;
+uniform mat4 M;
+uniform int bump;
+
+
+out vec4 color;
+
+void main()
+{
+	vec4 diffuse;
+	vec3 r;
+	float glossy = 41.9f;
+	vec3 specular;
+	
+
+	vec4 bumpNormal = vec4 ( TBN * ( texture2D ( MyTexture_2, TexCoord ) * 2.0 - 1.0 ).xyz , 1.0);
+	bumpNormal = vec4(  normalize(  mat3(transpose(inverse(V * M) ) )  * bumpNormal.xyz ), 1.0 ) ;
+
+
+	color = texture2D(MyTexture_1, TexCoord);	
+
+	lightVec = vec4(normalize(positionF.xyz - lightPosF), 1.0);
+
+
+	vec4 ambient = vec4(ka,1.0) * texture2D(MyTexture_1, TexCoord);
+	
+
+	if(bump == 1)
+	{	
+		diffuse = vec4(kd,1.0f) * color * lightColor * max(0.0, dot(-lightVec.xyz, bumpNormal.xyz));
+
+		r = reflect(lightVec.xyz, bumpNormal.xyz);
+	}
+	else
+	{
+		diffuse = vec4(kd,1.0f) * color * lightColor * max(0.0, dot(-lightVec.xyz, normalF.xyz));
+		r = reflect(lightVec.xyz, normalF.xyz);
+	}
+
+	
+	
+	specular = lightColor.xyz * pow( max(0.0, dot(r, normalize(-positionF.xyz))), glossy);
+
+	i = ambient + diffuse + vec4(specular, 1.0);
+
+	color = i ;
+
+}
