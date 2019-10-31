@@ -30,7 +30,7 @@ Good luck!
 
 extern "C"
 {
-	#include "glm_helper.h"
+#include "glm_helper.h"
 }
 
 
@@ -124,12 +124,9 @@ namespace
 	std::vector<glm::vec3> tangent;
 	std::vector<glm::vec3> bitangent;
 
-	
-
-	glm::mat4 MVP;
 	glm::mat4 V, P;
 	glm::mat4 M(1.0f);
-	
+
 	GLfloat ka[3];
 	GLfloat kd[3];
 	GLfloat ks[3];
@@ -138,9 +135,10 @@ namespace
 	GLfloat textureHight, textureWidth;
 
 	int bump = 0;
-	
 
-	
+	int g_width = 512;
+	int g_height = 512;
+
 }
 
 //you can modify the moving/rotating speed if it's too fast/slow for you
@@ -179,7 +177,7 @@ int main(int argc, char *argv[])
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 
-	
+
 
 	glutMainLoop();
 
@@ -217,10 +215,10 @@ void shaderReader(std::string path)
 void initShader(void)
 {
 	glewInit();
-	
+
 	// init vertexShader
 	shaderReader("../GLSL_example/Shaders/vertShader.txt");
-	
+
 	glvss = shaderSource.c_str();
 
 
@@ -244,7 +242,7 @@ void initShader(void)
 
 	// init fragmentShader
 	shaderReader("../GLSL_example/Shaders/fragShader.txt");
-	
+
 	glfss = shaderSource.c_str();
 
 	GLint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -272,7 +270,7 @@ void initShader(void)
 
 	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
-	if(!success)
+	if (!success)
 	{
 		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::LINK::COMPILATION_FAILED\n" << infoLog << std::endl;
@@ -293,7 +291,7 @@ void initShader(void)
 
 	// VAO needs to be binded first
 	glBindVertexArray(VAO);
-	
+
 
 	// init vertices, texCoord, normals 
 
@@ -328,23 +326,18 @@ void initShader(void)
 
 			PQ[j] = vTemp;
 			PQP[j] = tTemp;
-;
-			
+			;
+
 		}
-		float r = 1/((PQP[1] - PQP[0]).x * (PQP[2] - PQP[0]).y - (PQP[1] - PQP[0]).y * (PQP[2] - PQP[0]).x);
+		float r = 1 / ((PQP[1] - PQP[0]).x * (PQP[2] - PQP[0]).y - (PQP[1] - PQP[0]).y * (PQP[2] - PQP[0]).x);
 		glm::vec3 tangentTemp = ((PQ[1] - PQ[0]) * (PQP[2] - PQP[0]).y - (PQ[2] - PQ[0]) * (PQP[1] - PQP[0]).y)*r;
 		glm::vec3 bitangentTemp = ((PQ[2] - PQ[0]) * (PQP[1] - PQP[0]).x - (PQ[1] - PQ[0])*(PQP[2] - PQP[0]).x)*r;
-
-	
 
 		for (int i = 0; i < 3; i++)
 		{
 			tangent.push_back(tangentTemp);
 			bitangent.push_back(bitangentTemp);
 		}
-		
-
-
 	}
 
 	// VBO0(vertices)
@@ -414,18 +407,17 @@ void drawBigBall(void)
 	ka[0] = model->materials[1].ambient[0];
 	ka[1] = model->materials[1].ambient[1];
 	ka[2] = model->materials[1].ambient[2];
-	
+
 	kd[0] = model->materials[1].diffuse[0];
 	kd[1] = model->materials[1].diffuse[1];
 	kd[2] = model->materials[1].diffuse[2];
-	
+
 	ks[0] = model->materials[1].specular[0];
 	ks[1] = model->materials[1].specular[1];
 	ks[2] = model->materials[1].specular[2];
 
 	glUseProgram(shaderProgram);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "MVP"), 1, GL_FALSE, &MVP[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "V"), 1, GL_FALSE, &V[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "P"), 1, GL_FALSE, &P[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "M"), 1, GL_FALSE, &M[0][0]);
@@ -439,7 +431,7 @@ void drawBigBall(void)
 
 	GLint loc = glGetUniformLocation(shaderProgram, "MyTexture_1");
 
-	glActiveTexture(GL_TEXTURE0 + 0); 
+	glActiveTexture(GL_TEXTURE0 + 0);
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -468,75 +460,43 @@ void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	
-
 	//you may need to do somting here(declare some local variables you need and maybe load inverse Model matrix here...)
 	glUseProgram(0);
 	//please try not to modify the following block of code(you can but you are not supposed to)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(eyex, eyey, eyez,
-		eyex+cos(eyet*M_PI/180)*cos(eyep*M_PI / 180), eyey+sin(eyet*M_PI / 180), eyez-cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180),
+		eyex + cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180), eyey + sin(eyet*M_PI / 180), eyez - cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180),
 		0.0, 1.0, 0.0);
-	
 	draw_light_bulb();
 
-	glPushMatrix();
-		glTranslatef(ball_pos[0], ball_pos[1], ball_pos[2]);
-		
-		glRotatef(ball_rot[0], 1, 0, 0);
-		glRotatef(ball_rot[1], 0, 1, 0);
-		glRotatef(ball_rot[2], 0, 0, 1);
-	glPopMatrix();
+	glm::vec3 ballTran = glm::vec3(ball_pos[0], ball_pos[1], ball_pos[2]);
+	glm::vec3 ballRot = glm::vec3(ball_rot[0], ball_rot[1], ball_rot[2]);
 
-	//std::cout << model->materials[1].diffuse[0] << std::endl;
-
-	glm::vec3 ballTran;
-	glm::vec3 ballRot;
-	ballTran.x = ball_pos[0];
-	ballTran.y = ball_pos[1];
-	ballTran.z = ball_pos[2];
-
-	ballRot.x = ball_rot[0];
-	ballRot.y = ball_rot[1];
-	ballRot.z = ball_rot[2];
 	M = glm::mat4(1.0f);
-
 	M = glm::translate(M, ballTran);
 	M = glm::rotate(M, ball_rot[0], glm::vec3(1, 0, 0));
 	M = glm::rotate(M, ball_rot[1], glm::vec3(0, 1, 0));
 	M = glm::rotate(M, ball_rot[2], glm::vec3(0, 0, 1));
-	
-	
+
+
 	//please try not to modify the previous block of code
 
 	//you may need to do something here(pass the uniform variable to shader and render the model)
 	//glmDraw(model,GLM_TEXTURE);//please delete this line in your final code! It's just a preview of rendered object
 
 	// MVP
-
-	glm::vec3 camPos;
-	camPos.x = eyex;
-	camPos.y = eyey;
-	camPos.z = eyez;
-
-	glm::vec3 center;
-	center.x = eyex + cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180);
-	center.y = eyey + sin(eyet*M_PI / 180);
-	center.z = eyez - cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180);
-
-	glm::vec3 camUp;	
-	camUp = glm::vec3(0, 1, 0);
+	glm::vec3 camPos = glm::vec3(eyex, eyey, eyez);
+	glm::vec3 center = glm::vec3(eyex + cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180), eyey + sin(eyet*M_PI / 180), eyez - cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180));
+	glm::vec3 camUp = glm::vec3(0, 1, 0);
 
 	V = glm::lookAt(camPos, center, camUp);
-	P = glm::perspective((float)glm::radians(45.0), (float)1.0, (float) 0.1, (float)1000);
-	MVP = P*V;
+	P = glm::perspective((float)glm::radians(45.0), (float)g_width / (float)g_height, (float) 0.001f, (float)1000);
 
 	drawBigBall();
 
 	glutSwapBuffers();
 
-	
 	camera_light_ball_move();
 }
 
@@ -554,14 +514,14 @@ void keyboard(unsigned char key, int x, int y) {
 		{
 			bump = 1;
 			bumpCount++;
-		
+
 		}
 		else
 		{
 			bump = 0;
 			bumpCount++;
 		}
-		
+
 
 		break;
 	}
@@ -733,12 +693,14 @@ void reshape(int width, int height)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0f, (GLfloat)width / (GLfloat)height, 0.001f, 100.0f);
+	g_width = width;
+	g_height = height;
 	glMatrixMode(GL_MODELVIEW);
 }
 void motion(int x, int y) {
 	if (mleft)
 	{
-		eyep -= (x-mousex)*0.1;
+		eyep -= (x - mousex)*0.1;
 		eyet -= (y - mousey)*0.12;
 		if (eyet > 89.9)
 			eyet = 89.9;
@@ -755,7 +717,7 @@ void motion(int x, int y) {
 void mouse(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON)
 	{
-		if(state == GLUT_DOWN && !mright && !mmiddle)
+		if (state == GLUT_DOWN && !mright && !mmiddle)
 		{
 			mleft = true;
 			mousex = x;
@@ -789,9 +751,9 @@ void mouse(int button, int state, int x, int y) {
 }
 void camera_light_ball_move()
 {
-	GLfloat dx = 0, dy = 0, dz=0;
-	if(left|| right || forward || backward || up || down)
-	{ 
+	GLfloat dx = 0, dy = 0, dz = 0;
+	if (left || right || forward || backward || up || down)
+	{
 		if (left)
 			dx = -speed;
 		else if (right)
@@ -800,15 +762,15 @@ void camera_light_ball_move()
 			dy = speed;
 		else if (backward)
 			dy = -speed;
-		eyex += dy*cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180) + dx*sin(eyep*M_PI / 180);
-		eyey += dy*sin(eyet*M_PI / 180);
-		eyez += dy*(-cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180)) + dx*cos(eyep*M_PI / 180);
+		eyex += dy * cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180) + dx * sin(eyep*M_PI / 180);
+		eyey += dy * sin(eyet*M_PI / 180);
+		eyez += dy * (-cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180)) + dx * cos(eyep*M_PI / 180);
 		if (up)
 			eyey += speed;
 		else if (down)
 			eyey -= speed;
 	}
-	if(lleft || lright || lforward || lbackward || lup || ldown)
+	if (lleft || lright || lforward || lbackward || lup || ldown)
 	{
 		dx = 0;
 		dy = 0;
@@ -820,12 +782,12 @@ void camera_light_ball_move()
 			dy = speed;
 		else if (lbackward)
 			dy = -speed;
-		light_pos[0] += dy*cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180) + dx*sin(eyep*M_PI / 180);
-		light_pos[1] += dy*sin(eyet*M_PI / 180);
-		light_pos[2] += dy*(-cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180)) + dx*cos(eyep*M_PI / 180);
+		light_pos[0] += dy * cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180) + dx * sin(eyep*M_PI / 180);
+		light_pos[1] += dy * sin(eyet*M_PI / 180);
+		light_pos[2] += dy * (-cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180)) + dx * cos(eyep*M_PI / 180);
 		if (lup)
 			light_pos[1] += speed;
-		else if(ldown)
+		else if (ldown)
 			light_pos[1] -= speed;
 	}
 	if (bleft || bright || bforward || bbackward || bup || bdown)
@@ -840,15 +802,15 @@ void camera_light_ball_move()
 			dy = speed;
 		else if (bbackward)
 			dy = -speed;
-		ball_pos[0] += dy*cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180) + dx*sin(eyep*M_PI / 180);
-		ball_pos[1] += dy*sin(eyet*M_PI / 180);
-		ball_pos[2] += dy*(-cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180)) + dx*cos(eyep*M_PI / 180);
+		ball_pos[0] += dy * cos(eyet*M_PI / 180)*cos(eyep*M_PI / 180) + dx * sin(eyep*M_PI / 180);
+		ball_pos[1] += dy * sin(eyet*M_PI / 180);
+		ball_pos[2] += dy * (-cos(eyet*M_PI / 180)*sin(eyep*M_PI / 180)) + dx * cos(eyep*M_PI / 180);
 		if (bup)
 			ball_pos[1] += speed;
 		else if (bdown)
 			ball_pos[1] -= speed;
 	}
-	if(bx||by||bz || brx || bry || brz)
+	if (bx || by || bz || brx || bry || brz)
 	{
 		dx = 0;
 		dy = 0;
@@ -884,7 +846,7 @@ void keyboardup(unsigned char key, int x, int y) {
 	switch (key) {
 	case 'd':
 	{
-		right =false;
+		right = false;
 		break;
 	}
 	case 'a':
